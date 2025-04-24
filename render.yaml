@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: notam-form-parser
+    name: notam-ocr-parser
     env: docker
     plan: free
     autoDeploy: true
