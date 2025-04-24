@@ -16,14 +16,16 @@ FIR_MAP = {
     "YWLM": "YMMM", "YMMB": "YMMM", "YSBK": "YMMM", "YHSM": "YMMM", "YMTG": "YMMM",
     "YCOM": "YMMM", "YCNK": "YMMM", "YWLU": "YMMM", "YSNW": "YMMM", "YWLG": "YMMM",
     "YSHW": "YMMM", "YSRI": "YMMM", "YSWG": "YMMM", "YBTH": "YMMM", "YHOT": "YMMM",
-    "YWYY": "YMMM", "YSDU": "YMMM", "YORG": "YMMM",
+    "YWYY": "YMMM", "YSDU": "YMMM", "YORG": "YMMM", "YMAY": "YMMM", "YPPH": "YMMM",
+    "YPJT": "YMMM", "YPKG": "YMMM", "YBKE": "YMMM", "YBUN": "YMMM", "YPLM": "YMMM",
 
     # Brisbane FIR (YBBB)
     "YBBN": "YBBB", "YBCG": "YBBB", "YBTL": "YBBB", "YBNA": "YBBB", "YBPN": "YBBB",
     "YBAF": "YBBB", "YBWW": "YBBB", "YBCS": "YBBB", "YBSU": "YBBB", "YBMA": "YBBB",
     "YBMC": "YBBB", "YBOK": "YBBB", "YBHM": "YBBB", "YBTR": "YBBB", "YBCV": "YBBB",
-    "YBRK": "YBBB", "YBGD": "YBBB", "YGLA": "YBBB", "YGTN": "YBBB", "YMTI": "YBBB"
-}
+    "YBRK": "YBBB", "YBGD": "YBBB", "YGLA": "YBBB", "YGTN": "YBBB", "YMTI": "YBBB",
+    "YBTG": "YBBB", "YBPI": "YBBB", "YBUD": "YBBB", "YWDH": "YBBB", "YWCK": "YBBB"
+
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
