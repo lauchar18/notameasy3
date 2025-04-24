@@ -1,4 +1,3 @@
-
 from flask import Flask, request, render_template_string
 import fitz  # PyMuPDF
 import re
@@ -29,46 +28,17 @@ FIR_MAP = {
 
 # Q-code mapping based on ICAO Doc 8400
 q_code_mapping = {
-    # Runway
-    "RUNWAY CLOSED": "QMRLC",
-    "RWY CLOSED": "QMRLC",
-    "RWY CLSD": "QMRLC",
-    "RUNWAY WORK IN PROGRESS": "QMRXX",
-    "RWY WIP": "QMRXX",
-
-    # Taxiway
-    "TAXIWAY CLOSED": "QMXLC",
-    "TWY CLOSED": "QMXLC",
-    "TWY CLSD": "QMXLC",
-
-    # Apron
+    "RUNWAY CLOSED": "QMRLC", "RWY CLOSED": "QMRLC", "RWY CLSD": "QMRLC",
+    "RUNWAY WORK IN PROGRESS": "QMRXX", "RWY WIP": "QMRXX",
+    "TAXIWAY CLOSED": "QMXLC", "TWY CLOSED": "QMXLC", "TWY CLSD": "QMXLC",
     "APRON CLOSED": "QMALC",
-
-    # Navigation Aids
-    "ILS U/S": "QLIAS",
-    "VOR U/S": "QLVAS",
-    "NDB U/S": "QLNAS",
+    "ILS U/S": "QLIAS", "VOR U/S": "QLVAS", "NDB U/S": "QLNAS",
     "NAVIGATION AID UNAVAILABLE": "QNAVU",
-
-    # Lighting
-    "RUNWAY LIGHTING FAILED": "QLRLC",
-    "RWY LIGHT FAIL": "QLRLC",
-    "TWY LIGHT FAIL": "QLTLC",
-    "APRON LIGHT FAIL": "QLALC",
-
-    # Obstacles
-    "CRANE": "QOBCE",
-    "OBSTACLE": "QOBCE",
-
-    # Communications
-    "RADIO FAILURE": "QCAAS",
-    "FREQUENCY UNAVAILABLE": "QCAAS",
-
-    # Work in Progress
-    "WORK IN PROGRESS": "QMXLC",
-    "WIP": "QMXLC",
-
-    # Default fallback
+    "RUNWAY LIGHTING FAILED": "QLRLC", "RWY LIGHT FAIL": "QLRLC",
+    "TWY LIGHT FAIL": "QLTLC", "APRON LIGHT FAIL": "QLALC",
+    "CRANE": "QOBCE", "OBSTACLE": "QOBCE",
+    "RADIO FAILURE": "QCAAS", "FREQUENCY UNAVAILABLE": "QCAAS",
+    "WORK IN PROGRESS": "QMXLC", "WIP": "QMXLC",
     "DEFAULT": "QXXXX"
 }
 
@@ -145,10 +115,11 @@ def extract_notam_from_pdf(pdf_path):
             c_time = "YYMMDDHHMM"
 
         e_text = field_data.get("NOTAM Text", "NOTAM TEXT MISSING")
+        q_code = detect_q_code(e_text)
 
         notam = f"""
 B0001/25 {notam_type}
-Q) {fir_code}/QXXXX/IV/NBO/A/000/999/0000S00000E005
+Q) {fir_code}/{q_code}/IV/NBO/A/000/999/0000S00000E005
 A) {location}
 B) {b_time}
 C) {c_time}
