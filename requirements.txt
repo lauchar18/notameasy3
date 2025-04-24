@@ -1,4 +1,5 @@
 Flask
+PyMuPDF
 pytesseract
 pdf2image
 Pillow
