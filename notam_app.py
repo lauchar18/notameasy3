@@ -25,8 +25,7 @@ FIR_MAP = {
     "YBMC": "YBBB", "YBOK": "YBBB", "YBHM": "YBBB", "YBTR": "YBBB", "YBCV": "YBBB",
     "YBRK": "YBBB", "YBGD": "YBBB", "YGLA": "YBBB", "YGTN": "YBBB", "YMTI": "YBBB",
     "YBTG": "YBBB", "YBPI": "YBBB", "YBUD": "YBBB", "YWDH": "YBBB", "YWCK": "YBBB"
-
-
+}
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     notam_text = ""
