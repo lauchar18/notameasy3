@@ -44,9 +44,20 @@ q_code_mapping = {
 
 def detect_q_code(e_field_text):
     text = e_field_text.upper()
-    for phrase, q_code in q_code_mapping.items():
-        if phrase in text:
-            return q_code
+    priority_order = [
+        "RWY CLSD", "RWY CLOSED", "RUNWAY CLOSED",
+        "TWY CLOSED", "TAXIWAY CLOSED",
+        "APRON CLOSED",
+        "ILS U/S", "VOR U/S", "NDB U/S",
+        "LIGHT FAIL", "LIGHTING FAILED",
+        "CRANE", "OBSTACLE",
+        "RADIO FAILURE", "FREQUENCY UNAVAILABLE",
+        "WORK IN PROGRESS", "WIP"
+    ]
+    for phrase in priority_order:
+        for key, q_code in q_code_mapping.items():
+            if phrase in key and phrase in text:
+                return q_code
     return q_code_mapping["DEFAULT"]
 
 @app.route('/', methods=['GET', 'POST'])
