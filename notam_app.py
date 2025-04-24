@@ -1,3 +1,4 @@
+
 from flask import Flask, request, render_template_string
 import fitz  # PyMuPDF
 import re
@@ -6,6 +7,23 @@ import os
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# FIR mapping for Australian aerodromes
+FIR_MAP = {
+    # Melbourne FIR (YMMM)
+    "YSSY": "YMMM", "YSCB": "YMMM", "YBAS": "YMMM", "YMML": "YMMM", "YPAD": "YMMM",
+    "YMHB": "YMMM", "YMLT": "YMMM", "YARM": "YMMM", "YBHI": "YMMM", "YPPF": "YMMM",
+    "YWLM": "YMMM", "YMMB": "YMMM", "YSBK": "YMMM", "YHSM": "YMMM", "YMTG": "YMMM",
+    "YCOM": "YMMM", "YCNK": "YMMM", "YWLU": "YMMM", "YSNW": "YMMM", "YWLG": "YMMM",
+    "YSHW": "YMMM", "YSRI": "YMMM", "YSWG": "YMMM", "YBTH": "YMMM", "YHOT": "YMMM",
+    "YWYY": "YMMM", "YSDU": "YMMM", "YORG": "YMMM",
+
+    # Brisbane FIR (YBBB)
+    "YBBN": "YBBB", "YBCG": "YBBB", "YBTL": "YBBB", "YBNA": "YBBB", "YBPN": "YBBB",
+    "YBAF": "YBBB", "YBWW": "YBBB", "YBCS": "YBBB", "YBSU": "YBBB", "YBMA": "YBBB",
+    "YBMC": "YBBB", "YBOK": "YBBB", "YBHM": "YBBB", "YBTR": "YBBB", "YBCV": "YBBB",
+    "YBRK": "YBBB", "YBGD": "YBBB", "YGLA": "YBBB", "YGTN": "YBBB", "YMTI": "YBBB"
+}
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -17,14 +35,14 @@ def upload_file():
             file.save(file_path)
             notam_text = extract_notam_from_pdf(file_path)
 
-    return render_template_string("""
+    return render_template_string('''
         <h2>Upload NOTAM Request PDF</h2>
         <form method='post' enctype='multipart/form-data'>
             <input type='file' name='file'>
             <input type='submit' value='Upload'>
         </form>
         <pre>{{ notam_text }}</pre>
-    """, notam_text=notam_text)
+    ''', notam_text=notam_text)
 
 def extract_notam_from_pdf(pdf_path):
     try:
@@ -39,12 +57,12 @@ def extract_notam_from_pdf(pdf_path):
                 key = widget.field_name.strip() if widget.field_name else None
                 val = widget.field_value.strip() if widget.field_value else ""
                 if widget.field_type == fitz.PDF_WIDGET_TYPE_BUTTON and widget.field_flags & 32768:
-                    # Checkbox handling
                     val = "Yes" if widget.field_value == "Yes" else ""
                 if key:
                     field_data[key] = val
 
         location = field_data.get("AD", "XXXX")
+        fir_code = FIR_MAP.get(location, "XXXX")
 
         notam_type = "NOTAMN"
         notam_type_text = field_data.get("NOTAM Type", "New")
@@ -58,7 +76,6 @@ def extract_notam_from_pdf(pdf_path):
         finish_date = field_data.get("Finish Date", "")
         finish_time = field_data.get("Finish Time", "")
 
-        # Handle WIE and UFN checkbox overrides
         if field_data.get("WIE") == "Yes":
             b_time = "WIE"
         elif start_date and start_time:
@@ -75,8 +92,9 @@ def extract_notam_from_pdf(pdf_path):
 
         e_text = field_data.get("NOTAM Text", "NOTAM TEXT MISSING")
 
-        notam = f"""\nB0001/25 {notam_type}
-Q) {location}/QXXXX/IV/NBO/A/000/999/0000S00000E005
+        notam = f"""
+B0001/25 {notam_type}
+Q) {fir_code}/QXXXX/IV/NBO/A/000/999/0000S00000E005
 A) {location}
 B) {b_time}
 C) {c_time}
