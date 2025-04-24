@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template_string
-import pytesseract
-from pdf2image import convert_from_path
+import fitz  # PyMuPDF
 import re
 import os
 
@@ -29,25 +28,52 @@ def upload_file():
 
 def extract_notam_from_pdf(pdf_path):
     try:
-        images = convert_from_path(pdf_path)
-        text = pytesseract.image_to_string(images[0])
+        doc = fitz.open(pdf_path)
+        field_data = {}
 
-        ad_match = re.search(r"AD\s*[:\-]?\s*([A-Z]{4})", text)
-        location = ad_match.group(1) if ad_match else "XXXX"
+        for page in doc:
+            widgets = page.widgets()
+            if not widgets:
+                continue
+            for widget in widgets:
+                key = widget.field_name.strip() if widget.field_name else None
+                val = widget.field_value.strip() if widget.field_value else ""
+                if widget.field_type == fitz.PDF_WIDGET_TYPE_BUTTON and widget.field_flags & 32768:
+                    # Checkbox handling
+                    val = "Yes" if widget.field_value == "Yes" else ""
+                if key:
+                    field_data[key] = val
+
+        location = field_data.get("AD", "XXXX")
 
         notam_type = "NOTAMN"
-        if "NOTAM R" in text:
-            notam_type = "NOTAMR"
-        elif "NOTAM C" in text:
+        notam_type_text = field_data.get("NOTAM Type", "New")
+        if "Cancel" in notam_type_text:
             notam_type = "NOTAMC"
+        elif "Review" in notam_type_text:
+            notam_type = "NOTAMR"
 
-        b_match = re.search(r"Item B.*?(\d{6})\s*(\d{4})", text)
-        c_match = re.search(r"Item C.*?(\d{6})\s*(\d{4})", text)
-        b_time = f"{b_match.group(1)}{b_match.group(2)}" if b_match else "YYMMDDHHMM"
-        c_time = f"{c_match.group(1)}{c_match.group(2)}" if c_match else "YYMMDDHHMM"
+        start_date = field_data.get("Start Date", "")
+        start_time = field_data.get("Start Time", "")
+        finish_date = field_data.get("Finish Date", "")
+        finish_time = field_data.get("Finish Time", "")
 
-        e_match = re.search(r"Item E\).*?\n(.*?)\n", text, re.DOTALL)
-        e_text = e_match.group(1).strip() if e_match else "NOTAM TEXT MISSING"
+        # Handle WIE and UFN checkbox overrides
+        if field_data.get("WIE") == "Yes":
+            b_time = "WIE"
+        elif start_date and start_time:
+            b_time = f"{start_date}{start_time}"
+        else:
+            b_time = "YYMMDDHHMM"
+
+        if field_data.get("UFN") == "Yes":
+            c_time = "UFN"
+        elif finish_date and finish_time:
+            c_time = f"{finish_date}{finish_time}"
+        else:
+            c_time = "YYMMDDHHMM"
+
+        e_text = field_data.get("NOTAM Text", "NOTAM TEXT MISSING")
 
         notam = f"""\nB0001/25 {notam_type}
 Q) {location}/QXXXX/IV/NBO/A/000/999/0000S00000E005
