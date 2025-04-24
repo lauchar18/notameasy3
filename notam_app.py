@@ -7,14 +7,43 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-FIR_MAP = { ... }  # Keep existing FIR map from your version
-q_code_mapping = { ... }  # Keep existing Q-code map from your version
+# ✅ FIR map (dictionary format)
+FIR_MAP = {
+    "YSSY": "YMMM", "YSCB": "YMMM", "YBAS": "YMMM", "YMML": "YMMM", "YPAD": "YMMM",
+    "YMHB": "YMMM", "YMLT": "YMMM", "YARM": "YMMM", "YBHI": "YMMM", "YPPF": "YMMM",
+    "YWLM": "YMMM", "YMMB": "YMMM", "YSBK": "YMMM", "YHSM": "YMMM", "YMTG": "YMMM",
+    "YCOM": "YMMM", "YCNK": "YMMM", "YWLU": "YMMM", "YSNW": "YMMM", "YWLG": "YMMM",
+    "YSHW": "YMMM", "YSRI": "YMMM", "YSWG": "YMMM", "YBTH": "YMMM", "YHOT": "YMMM",
+    "YWYY": "YMMM", "YSDU": "YMMM", "YORG": "YMMM", "YMAY": "YMMM", "YPPH": "YMMM",
+    "YPJT": "YMMM", "YPKG": "YMMM", "YBKE": "YMMM", "YBUN": "YMMM", "YPLM": "YMMM",
+    "YBBN": "YBBB", "YBCG": "YBBB", "YBTL": "YBBB", "YBNA": "YBBB", "YBPN": "YBBB",
+    "YBAF": "YBBB", "YBWW": "YBBB", "YBCS": "YBBB", "YBSU": "YBBB", "YBMA": "YBBB",
+    "YBMC": "YBBB", "YBOK": "YBBB", "YBHM": "YBBB", "YBTR": "YBBB", "YBCV": "YBBB",
+    "YBRK": "YBBB", "YBGD": "YBBB", "YGLA": "YBBB", "YGTN": "YBBB", "YMTI": "YBBB",
+    "YBTG": "YBBB", "YBPI": "YBBB", "YBUD": "YBBB", "YWDH": "YBBB", "YWCK": "YBBB"
+}
+
+# ✅ Q-code dictionary
+q_code_mapping = {
+    "RUNWAY CLOSED": "QMRLC", "RWY CLOSED": "QMRLC", "RWY CLSD": "QMRLC",
+    "RUNWAY WORK IN PROGRESS": "QMRXX", "RWY WIP": "QMRXX",
+    "TAXIWAY CLOSED": "QMXLC", "TWY CLOSED": "QMXLC", "TWY CLSD": "QMXLC",
+    "APRON CLOSED": "QMALC",
+    "ILS U/S": "QLIAS", "VOR U/S": "QLVAS", "NDB U/S": "QLNAS",
+    "NAVIGATION AID UNAVAILABLE": "QNAVU",
+    "RUNWAY LIGHTING FAILED": "QLRLC", "RWY LIGHT FAIL": "QLRLC",
+    "TWY LIGHT FAIL": "QLTLC", "APRON LIGHT FAIL": "QLALC",
+    "CRANE": "QOBCE", "OBSTACLE": "QOBCE",
+    "RADIO FAILURE": "QCAAS", "FREQUENCY UNAVAILABLE": "QCAAS",
+    "WORK IN PROGRESS": "QMXLC", "WIP": "QMXLC",
+    "DEFAULT": "QXXXX"
+}
 
 def detect_q_code(e_field_text):
     text = e_field_text.upper()
     for phrase, q_code in q_code_mapping.items():
         if phrase in text:
-            return q_code, phrase  # return reason phrase too
+            return q_code, phrase
     return q_code_mapping["DEFAULT"], "No specific match"
 
 @app.route('/', methods=['GET', 'POST'])
@@ -101,7 +130,9 @@ def extract_notam_from_pdf(pdf_path):
         e_text = field_data.get("NOTAM Text", "NOTAM TEXT MISSING")
         q_code, reason = detect_q_code(e_text)
 
-        contact_info = "\n".join([line.strip() for line in last_page_text.splitlines() if "contact" in line.lower() or "phone" in line.lower() or "email" in line.lower()])
+        # Grab contact info from bottom of last page
+        contact_info = "\n".join([line.strip() for line in last_page_text.splitlines() 
+                                  if "contact" in line.lower() or "phone" in line.lower() or "email" in line.lower()])
 
         notam = f"""
 B0001/25 {notam_type}
