@@ -26,6 +26,59 @@ FIR_MAP = {
     "YBRK": "YBBB", "YBGD": "YBBB", "YGLA": "YBBB", "YGTN": "YBBB", "YMTI": "YBBB",
     "YBTG": "YBBB", "YBPI": "YBBB", "YBUD": "YBBB", "YWDH": "YBBB", "YWCK": "YBBB"
 }
+
+# Q-code mapping based on ICAO Doc 8400
+q_code_mapping = {
+    # Runway
+    "RUNWAY CLOSED": "QMRLC",
+    "RWY CLOSED": "QMRLC",
+    "RWY CLSD": "QMRLC",
+    "RUNWAY WORK IN PROGRESS": "QMRXX",
+    "RWY WIP": "QMRXX",
+
+    # Taxiway
+    "TAXIWAY CLOSED": "QMXLC",
+    "TWY CLOSED": "QMXLC",
+    "TWY CLSD": "QMXLC",
+
+    # Apron
+    "APRON CLOSED": "QMALC",
+
+    # Navigation Aids
+    "ILS U/S": "QLIAS",
+    "VOR U/S": "QLVAS",
+    "NDB U/S": "QLNAS",
+    "NAVIGATION AID UNAVAILABLE": "QNAVU",
+
+    # Lighting
+    "RUNWAY LIGHTING FAILED": "QLRLC",
+    "RWY LIGHT FAIL": "QLRLC",
+    "TWY LIGHT FAIL": "QLTLC",
+    "APRON LIGHT FAIL": "QLALC",
+
+    # Obstacles
+    "CRANE": "QOBCE",
+    "OBSTACLE": "QOBCE",
+
+    # Communications
+    "RADIO FAILURE": "QCAAS",
+    "FREQUENCY UNAVAILABLE": "QCAAS",
+
+    # Work in Progress
+    "WORK IN PROGRESS": "QMXLC",
+    "WIP": "QMXLC",
+
+    # Default fallback
+    "DEFAULT": "QXXXX"
+}
+
+def detect_q_code(e_field_text):
+    text = e_field_text.upper()
+    for phrase, q_code in q_code_mapping.items():
+        if phrase in text:
+            return q_code
+    return q_code_mapping["DEFAULT"]
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     notam_text = ""
